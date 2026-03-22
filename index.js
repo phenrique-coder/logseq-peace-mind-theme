@@ -42,6 +42,9 @@ function applyPalette(palettes, paletteId) {
 	}
 
 	styleEl.textContent = [
+		// ── Hide button if not PeaceMind theme (active check via JS) ────────────
+		`.peace-mind-toolbar-btn { display: flex !important; }`,
+
 		// ── Modo escuro ──────────────────────────────────────────────────────────
 		'.dark-theme, html[data-theme="dark"] {',
 		`  --ls-active-primary-color:     ${p.dark}   !important;`,
@@ -130,6 +133,47 @@ function applyPalette(palettes, paletteId) {
 		`  color: ${p.light} !important;`,
 		"}",
 	].join("\n");
+}
+
+/** Limpa as injeções no DOM do Logseq */
+function clearPeaceMindStyles() {
+	const STYLE_ID = "peacemind-dynamic-style";
+	let styleEl = parent.document.getElementById(STYLE_ID);
+	if (styleEl) {
+		// Mantém o style, mas apenas com a regra de esconder o botão
+		styleEl.textContent = ".peace-mind-toolbar-btn { display: none !important; }";
+	} else {
+		styleEl = parent.document.createElement("style");
+		styleEl.id = STYLE_ID;
+		styleEl.textContent = ".peace-mind-toolbar-btn { display: none !important; }";
+		parent.document.head.appendChild(styleEl);
+	}
+
+	const docRoot = parent.document.documentElement;
+	const props = [
+		"--peace-accent-light",
+		"--peace-accent-dark",
+		"--peace-accent-color",
+		"--peace-bg-tint-light",
+		"--peace-bg-tint-dark",
+		"--peace-sidebar-light",
+		"--peace-sidebar-dark",
+		"--peace-header-light",
+		"--peace-header-dark",
+	];
+	props.forEach((prop) => docRoot.style.removeProperty(prop));
+}
+
+/** Verifica se o tema ativo é o PeaceMind e aplica/remove estilos */
+async function syncPeaceMindState(themeName, palettes) {
+	// Se o Logseq carregar o tema, ele passa o nome "PeaceMind" (nome que demos no package.json)
+	const isPeaceMind = themeName === "PeaceMind";
+
+	if (isPeaceMind) {
+		applyPalette(palettes, logseq.settings.palette);
+	} else {
+		clearPeaceMindStyles();
+	}
 }
 
 /**
@@ -307,15 +351,40 @@ async function main() {
 		},
 	]);
 
-	// Aplicação inicial
-	applyPalette(palettes, logseq.settings.palette || defaultPalette);
+	// Cleanup total ao descarregar plugin
+	logseq.beforeunload(async () => {
+		const styleEl = parent.document.getElementById("peacemind-dynamic-style");
+		if (styleEl) styleEl.remove();
 
-	// Modelo de eventos — apenas toggle_menu (sem select_palette, que agora é DOM direto)
+		const docRoot = parent.document.documentElement;
+		const props = [
+			"--peace-accent-light",
+			"--peace-accent-dark",
+			"--peace-accent-color",
+			"--peace-bg-tint-light",
+			"--peace-bg-tint-dark",
+			"--peace-sidebar-light",
+			"--peace-sidebar-dark",
+			"--peace-header-light",
+			"--peace-header-dark",
+		];
+		props.forEach((prop) => docRoot.style.removeProperty(prop));
+	});
+
+	// Aplicação inicial baseada no tema atual do Logseq
+	const { preferredTheme } = await logseq.App.getUserConfigs();
+	syncPeaceMindState(preferredTheme, palettes);
+
+	// Listener de troca de tema
+	logseq.App.onThemeChanged(({ name }) => {
+		syncPeaceMindState(name, palettes);
+	});
+
+	// Modelo de eventos
 	logseq.provideModel({
 		toggle_menu: () => {
 			const existing = parent.document.getElementById("peace-mind-menu");
 			if (existing) {
-				// Comportamento de toggle: se já está aberto, fecha
 				closeMenu();
 			} else {
 				openMenu(palettes, defaultPalette);
@@ -323,19 +392,22 @@ async function main() {
 		},
 	});
 
-	// Botão na toolbar
+	// Botão na toolbar (com classe para controle de visibilidade)
 	logseq.App.registerUIItem("toolbar", {
 		key: "peace-mind-palette-button",
 		template:
-			'<a class="button" data-on-click="toggle_menu" title="Peace Mind Colors">' +
+			'<a class="button peace-mind-toolbar-btn" data-on-click="toggle_menu" title="Peace Mind Colors">' +
 			'<i class="ti ti-palette" style="font-size:20px;"></i>' +
 			"</a>",
 	});
 
-	// Re-aplica quando settings mudam externamente (ex.: painel de configurações)
-	logseq.onSettingsChanged((newSettings) => {
+	// Re-aplica quando settings mudam (se o tema PeaceMind estiver ativo)
+	logseq.onSettingsChanged(async (newSettings) => {
 		if (_isApplying) return;
-		applyPalette(palettes, newSettings.palette);
+		const { preferredTheme } = await logseq.App.getUserConfigs();
+		if (preferredTheme === "PeaceMind") {
+			applyPalette(palettes, newSettings.palette);
+		}
 	});
 }
 

@@ -263,7 +263,7 @@ h1.title,
 .left-sidebar-inner .item,
 .cp__right-sidebar-inner .item,
 .cp__right-sidebar-inner .sidebar-item {
-	border-radius: 8px;
+	border-radius: 6px;
 	margin: 1px 6px;
 	padding: 6px 10px;
 	cursor: pointer;
@@ -389,12 +389,12 @@ footer.create button#create-button:hover,
 .left-sidebar-inner .item:hover {
 	background-color: color-mix(
 		in srgb,
-		var(--peace-accent-color, #6b9e8a) 12%,
-		transparent
-	);
+		var(--peace-accent-color, #6b9e8a) 8%,
+		var(--ls-left-sidebar-bg-color)
+	) !important;
 	box-shadow: inset 3px 0 0
-		color-mix(in srgb, var(--peace-accent-color, #6b9e8a) 50%, transparent);
-	transform: translateX(2px);
+		color-mix(in srgb, var(--peace-accent-color, #6b9e8a) 40%, var(--ls-left-sidebar-bg-color)) !important;
+	transform: translateX(2px) !important;
 }
 
 /* Estado ativo: borda sólida e texto na accentColor */
@@ -402,12 +402,12 @@ footer.create button#create-button:hover,
 .left-sidebar-inner .item.selected {
 	background-color: color-mix(
 		in srgb,
-		var(--peace-accent-color, #6b9e8a) 18%,
-		transparent
-	);
-	box-shadow: inset 3px 0 0 var(--peace-accent-color, #6b9e8a);
+		var(--peace-accent-color, #6b9e8a) 12%,
+		var(--ls-left-sidebar-bg-color)
+	) !important;
+	box-shadow: inset 4px 0 0 var(--peace-accent-color, #6b9e8a) !important;
 	color: var(--peace-accent-color, #6b9e8a) !important;
-	font-weight: 500;
+	font-weight: 600 !important;
 }
 
 /* Ícones da sidebar herdam a cor de acento quando ativos */

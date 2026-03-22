@@ -24,7 +24,7 @@
     "themes": [
       {
         "name": "PeaceMind",
-        "url": "./custom.css",
+        "url": "./peace-mind.css",
         "description": "😌 A calming theme supporting both Light & Dark modes."
       }
     ],
