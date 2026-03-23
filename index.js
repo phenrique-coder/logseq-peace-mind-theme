@@ -166,12 +166,19 @@ function clearPeaceMindStyles() {
 
 /** Verifica se o tema ativo é o PeaceMind e aplica/remove estilos */
 async function syncPeaceMindState(themeName, palettes) {
-	// Se o Logseq carregar o tema, ele passa o nome "PeaceMind" (nome que demos no package.json)
-	const isPeaceMind = themeName === "PeaceMind";
+	// 1. Checagem por nome (inclusiva e case-insensitive)
+	const nameMatch = themeName?.toLowerCase().includes("peacemind");
+
+	// 2. Checagem por presença do CSS no DOM (Super seguro para Plugins de Tema)
+	// O Logseq injeta o tema com um ID ou href que contém o nome do arquivo
+	const isCssLoaded = parent.document.querySelector('link[id*="peacemind"], link[href*="peace-mind"]') !== null;
+
+	const isPeaceMind = nameMatch || isCssLoaded;
 
 	if (isPeaceMind) {
 		applyPalette(palettes, logseq.settings.palette);
-	} else {
+	} else if (themeName) {
+		// Só limpamos e escondemos se tivermos certeza que outro tema (com nome válido) foi escolhido
 		clearPeaceMindStyles();
 	}
 }
@@ -371,9 +378,11 @@ async function main() {
 		props.forEach((prop) => docRoot.style.removeProperty(prop));
 	});
 
-	// Aplicação inicial baseada no tema atual do Logseq
-	const { preferredTheme } = await logseq.App.getUserConfigs();
-	syncPeaceMindState(preferredTheme, palettes);
+	// Aplicação inicial baseada no tema atual do Logseq (com pequeno delay para o boot)
+	setTimeout(async () => {
+		const { preferredTheme } = await logseq.App.getUserConfigs();
+		syncPeaceMindState(preferredTheme, palettes);
+	}, 500);
 
 	// Listener de troca de tema
 	logseq.App.onThemeChanged(({ name }) => {
@@ -405,7 +414,10 @@ async function main() {
 	logseq.onSettingsChanged(async (newSettings) => {
 		if (_isApplying) return;
 		const { preferredTheme } = await logseq.App.getUserConfigs();
-		if (preferredTheme === "PeaceMind") {
+		const nameMatch = preferredTheme?.toLowerCase().includes("peacemind");
+		const isCssLoaded = parent.document.querySelector('link[id*="peacemind"], link[href*="peace-mind"]') !== null;
+
+		if (nameMatch || isCssLoaded) {
 			applyPalette(palettes, newSettings.palette);
 		}
 	});
