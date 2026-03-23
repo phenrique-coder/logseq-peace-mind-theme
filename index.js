@@ -135,22 +135,14 @@ function applyPalette(palettes, paletteId) {
 	].join("\n");
 }
 
-/** Limpa as injeções no DOM do Logseq */
+/** Remove apenas os estilos dinâmicos injetados pelo plugin */
 function clearPeaceMindStyles() {
 	const STYLE_ID = "peacemind-dynamic-style";
-	let styleEl = parent.document.getElementById(STYLE_ID);
-	if (styleEl) {
-		// Mantém o style, mas apenas com a regra de esconder o botão
-		styleEl.textContent = ".peace-mind-toolbar-btn { display: none !important; }";
-	} else {
-		styleEl = parent.document.createElement("style");
-		styleEl.id = STYLE_ID;
-		styleEl.textContent = ".peace-mind-toolbar-btn { display: none !important; }";
-		parent.document.head.appendChild(styleEl);
-	}
+	const styleEl = parent.document.getElementById(STYLE_ID);
+	if (styleEl) styleEl.remove();
 
 	const docRoot = parent.document.documentElement;
-	const props = [
+	[
 		"--peace-accent-light",
 		"--peace-accent-dark",
 		"--peace-accent-color",
@@ -160,29 +152,9 @@ function clearPeaceMindStyles() {
 		"--peace-sidebar-dark",
 		"--peace-header-light",
 		"--peace-header-dark",
-	];
-	props.forEach((prop) => docRoot.style.removeProperty(prop));
+	].forEach((prop) => docRoot.style.removeProperty(prop));
 }
 
-/**
- * Verifica se o PeaceMind está ativo olhando no DOM pelo link do CSS.
- * Mais confiável do que checar o nome via API.
- */
-function isPeaceMindCssActive() {
-	return parent.document.querySelector('link[href*="peace-mind"]') !== null;
-}
-
-/** Chamado quando o usuário troca de tema no Logseq */
-function onThemeChange(palettes) {
-	// Pequeno delay para o DOM atualizar os link tags antes de verificar
-	setTimeout(() => {
-		if (isPeaceMindCssActive()) {
-			applyPalette(palettes, logseq.settings.palette);
-		} else {
-			clearPeaceMindStyles();
-		}
-	}, 300);
-}
 
 /**
  * Abre o menu de seleção de paletas renderizando uma div diretamente no
@@ -379,13 +351,11 @@ async function main() {
 		props.forEach((prop) => docRoot.style.removeProperty(prop));
 	});
 
-	// Aplicação imediata — o plugin só carrega quando ativo, então sempre aplica
+	// Aplicação imediata ao carregar
+	// O plugin só é carregado pelo Logseq quando o tema está ativo, então sempre aplicamos.
+	// O botão da toolbar some automaticamente quando o plugin é desativado/desinstalado.
 	applyPalette(palettes, logseq.settings.palette || defaultPalette);
 
-	// Listener de troca de tema — verifica pelo DOM se nosso CSS ainda está presente
-	logseq.App.onThemeChanged(() => {
-		onThemeChange(palettes);
-	});
 
 	// Modelo de eventos
 	logseq.provideModel({
