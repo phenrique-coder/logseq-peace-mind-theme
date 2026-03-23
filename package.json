@@ -1,7 +1,7 @@
 {
   "name": "logseq-peacemind-theme",
   "title": "PeaceMind Theme",
-  "version": "1.0.4",
+  "version": "1.1.0",
   "description": "😌 A calming, minimalist Logseq theme with 7 peaceful color palettes.",
   "author": "phenrique-coder",
   "license": "MIT",
@@ -17,10 +17,10 @@
     "zen",
     "productivity"
   ],
-  "main": "index.js",
+  "main": "index.html",
   "logseq": {
     "id": "logseq-peacemind-theme",
-    "theme": true,
+    "title": "PeaceMind",
     "themes": [
       {
         "name": "PeaceMind",
@@ -39,6 +39,5 @@
         "enumMessages": ["Zen Sage (Default)", "Cool Slate", "Warm Sand", "Desert Rose", "Infinite Horizon", "Forest Moss", "Soft Clay"]
       }
     }
-  },
-  "effect": true
+  }
 }

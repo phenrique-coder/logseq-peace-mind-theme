@@ -1,170 +1,73 @@
-// palettes.js é carregado via dynamic import (suportado no Electron/Chromium do Logseq)
-// Edite palettes.js para adicionar ou modificar paletas sem tocar neste arquivo.
+// Peace Mind Theme — Plugin Logic
+// Entry point: index.html (loads @logseq/libs via CDN + this file)
+// Strategy: Set CSS custom properties via inline style on <html> (highest priority).
+// The peace-mind.css consumes these variables to style the entire UI.
 
 /** Flag para evitar loop: select_palette aplica direto e sinaliza para o listener ignorar */
 let _isApplying = false;
 
-/** Handler de click fora do menu, guardado para ser removido depois */
+/** Handler de click fora do menu */
 let _outsideClickHandler = null;
 
+/** Lista de variáveis CSS para cleanup */
+const CSS_VARS = [
+	"--peace-accent-light",
+	"--peace-accent-dark",
+	"--peace-accent-color",
+	"--peace-bg-tint-light",
+	"--peace-bg-tint-dark",
+	"--peace-sidebar-light",
+	"--peace-sidebar-dark",
+	"--peace-header-light",
+	"--peace-header-dark",
+];
+
 /**
- * Injeta/atualiza as variáveis CSS no documento pai do Logseq.
- *
- * Estratégia:
- *  1. style.setProperty() no <html> — prioridade máxima (inline > qualquer regra)
- *  2. <style id="peace-mind-dynamic-style"> no <head> — sobrescreve vars nativas do Logseq
+ * Aplica a paleta definindo as variáveis CSS diretamente no style inline do <html>.
+ * Inline styles têm prioridade máxima na cascata CSS, então sempre sobrescrevem
+ * os valores padrão definidos no peace-mind.css.
  *
  * @param {object} palettes  — objeto importado de palettes.js
  * @param {string} paletteId — chave da paleta escolhida
  */
 function applyPalette(palettes, paletteId) {
 	const p = palettes[paletteId] || palettes.sage;
+	const root = parent.document.documentElement;
 
-	// ── 1. Variáveis custom no inline style do <html> ──────────────────────────
-	const docRoot = parent.document.documentElement;
-	docRoot.style.setProperty("--peace-accent-light", p.light);
-	docRoot.style.setProperty("--peace-accent-dark", p.dark);
-	docRoot.style.setProperty("--peace-accent-color", p.accentColor ?? p.light);
-	docRoot.style.setProperty("--peace-bg-tint-light", p.bgLight);
-	docRoot.style.setProperty("--peace-bg-tint-dark", p.bgDark);
-	docRoot.style.setProperty("--peace-sidebar-light", p.sidebarLight ?? p.bgLight);
-	docRoot.style.setProperty("--peace-sidebar-dark", p.sidebarDark ?? p.bgDark);
-	docRoot.style.setProperty("--peace-header-light", p.headerLight ?? p.sidebarLight ?? p.bgLight);
-	docRoot.style.setProperty("--peace-header-dark", p.headerDark ?? p.sidebarDark ?? p.bgDark);
-
-	// ── 2. <style> no <head> do documento pai ─────────────────────────────────
-	const STYLE_ID = "peacemind-dynamic-style";
-	let styleEl = parent.document.getElementById(STYLE_ID);
-	if (!styleEl) {
-		styleEl = parent.document.createElement("style");
-		styleEl.id = STYLE_ID;
-		parent.document.head.appendChild(styleEl);
-	}
-
-	styleEl.textContent = [
-		// ── Hide button if not PeaceMind theme (active check via JS) ────────────
-		`.peace-mind-toolbar-btn { display: flex !important; }`,
-
-		// ── Modo escuro ──────────────────────────────────────────────────────────
-		'.dark-theme, html[data-theme="dark"] {',
-		`  --ls-active-primary-color:     ${p.dark}   !important;`,
-		`  --ls-active-secondary-color:   ${p.dark}   !important;`,
-		`  --ls-link-text-color:          ${p.dark}   !important;`,
-		`  --ls-block-bullet-color:       ${p.dark}   !important;`,
-		`  --ls-page-title-color:         ${p.dark}   !important;`,
-		`  --ls-tag-text-color:           ${p.dark}   !important;`,
-		`  --ls-primary-background-color: ${p.bgDark} !important;`,
-		`  --ls-left-sidebar-bg-color:    ${p.sidebarDark ?? p.bgDark} !important;`,
-		`  --ls-right-sidebar-bg-color:   ${p.sidebarDark ?? p.bgDark} !important;`,
-		`  .cp__right-sidebar-inner { background-color: ${p.sidebarDark ?? p.bgDark} !important; }`,
-		`  #head { background-color: ${p.headerDark ?? p.sidebarDark ?? p.bgDark} !important; border-bottom: 1px solid var(--ls-border-color); }`,
-		'  /* Botão Criar - Hover Blindado */',
-		`  #create-button { background-color: ${p.accentColor ?? p.dark} !important; color: var(--peace-standard-text) !important; border: 1px solid rgba(255,255,255,0.1) !important; }`,
-		`  footer.create #create-button:hover, #create-button:hover { background-color: ${p.accentColor ?? p.dark} !important; background: ${p.accentColor ?? p.dark} !important; filter: brightness(1.1) !important; opacity: 1 !important; background-image: none !important; }`,
-		`  #create-button:active { filter: brightness(0.9) !important; }`,
-		"}",
-
-		// ── Modo claro ───────────────────────────────────────────────────────────
-		'.white-theme, html[data-theme="light"] {',
-		`  --ls-active-primary-color:     ${p.light}   !important;`,
-		`  --ls-active-secondary-color:   ${p.light}   !important;`,
-		`  --ls-link-text-color:          ${p.light}   !important;`,
-		`  --ls-block-bullet-color:       ${p.light}   !important;`,
-		`  --ls-page-title-color:         ${p.light}   !important;`,
-		`  --ls-tag-text-color:           ${p.light}   !important;`,
-		`  --ls-primary-background-color: ${p.bgLight} !important;`,
-		`  --ls-left-sidebar-bg-color:    ${p.sidebarLight ?? p.bgLight} !important;`,
-		`  --ls-right-sidebar-bg-color:   ${p.sidebarLight ?? p.bgLight} !important;`,
-		`  .cp__right-sidebar-inner { background-color: ${p.sidebarLight ?? p.bgLight} !important; }`,
-		`  #head { background-color: ${p.headerLight ?? p.sidebarLight ?? p.bgLight} !important; border-bottom: 1px solid var(--ls-border-color); }`,
-		'  /* Botão Criar - Hover Blindado */',
-		`  #create-button { background-color: ${p.accentColor ?? p.light} !important; color: var(--peace-standard-text) !important; border: 1px solid rgba(0,0,0,0.05) !important; }`,
-		`  footer.create #create-button:hover, #create-button:hover { background-color: ${p.accentColor ?? p.light} !important; background: ${p.accentColor ?? p.light} !important; filter: brightness(1.1) !important; opacity: 1 !important; background-image: none !important; }`,
-		`  #create-button:active { filter: brightness(0.9) !important; }`,
-		"}",
-
-		// ── Área de edição / Diário — modo escuro ────────────────────────────────
-		".dark-theme #main-content-container,",
-		".dark-theme .cp__sidebar-main-content,",
-		".dark-theme .journal,",
-		".dark-theme .journal-item,",
-		".dark-theme .page-inner,",
-		".dark-theme .blocks-container,",
-		".dark-theme .editor-wrapper,",
-		".dark-theme .ls-block,",
-		'html[data-theme="dark"] #main-content-container,',
-		'html[data-theme="dark"] .cp__sidebar-main-content,',
-		'html[data-theme="dark"] .journal,',
-		'html[data-theme="dark"] .journal-item,',
-		'html[data-theme="dark"] .page-inner,',
-		'html[data-theme="dark"] .blocks-container,',
-		'html[data-theme="dark"] .editor-wrapper,',
-		'html[data-theme="dark"] .ls-block {',
-		`  background-color: ${p.bgDark} !important;`,
-		"}",
-
-		// ── Área de edição / Diário — modo claro ─────────────────────────────────
-		".white-theme #main-content-container,",
-		".white-theme .cp__sidebar-main-content,",
-		".white-theme .journal,",
-		".white-theme .journal-item,",
-		".white-theme .page-inner,",
-		".white-theme .blocks-container,",
-		".white-theme .editor-wrapper,",
-		".white-theme .ls-block,",
-		'html[data-theme="light"] #main-content-container,',
-		'html[data-theme="light"] .cp__sidebar-main-content,',
-		'html[data-theme="light"] .journal,',
-		'html[data-theme="light"] .journal-item,',
-		'html[data-theme="light"] .page-inner,',
-		'html[data-theme="light"] .blocks-container,',
-		'html[data-theme="light"] .editor-wrapper,',
-		'html[data-theme="light"] .ls-block {',
-		`  background-color: ${p.bgLight} !important;`,
-		"}",
-
-		// ── Botões de navegação ativos da sidebar esquerda ───────────────────────
-		".dark-theme .left-sidebar-inner .item.active,",
-		'html[data-theme="dark"] .left-sidebar-inner .item.active {',
-		`  color: ${p.dark} !important;`,
-		"}",
-		".white-theme .left-sidebar-inner .item.active,",
-		'html[data-theme="light"] .left-sidebar-inner .item.active {',
-		`  color: ${p.light} !important;`,
-		"}",
-	].join("\n");
+	root.style.setProperty("--peace-accent-light", p.light);
+	root.style.setProperty("--peace-accent-dark", p.dark);
+	root.style.setProperty("--peace-accent-color", p.accentColor ?? p.light);
+	root.style.setProperty("--peace-bg-tint-light", p.bgLight);
+	root.style.setProperty("--peace-bg-tint-dark", p.bgDark);
+	root.style.setProperty("--peace-sidebar-light", p.sidebarLight ?? p.bgLight);
+	root.style.setProperty("--peace-sidebar-dark", p.sidebarDark ?? p.bgDark);
+	root.style.setProperty("--peace-header-light", p.headerLight ?? p.sidebarLight ?? p.bgLight);
+	root.style.setProperty("--peace-header-dark", p.headerDark ?? p.sidebarDark ?? p.bgDark);
 }
-
-/** Remove apenas os estilos dinâmicos injetados pelo plugin */
-function clearPeaceMindStyles() {
-	const STYLE_ID = "peacemind-dynamic-style";
-	const styleEl = parent.document.getElementById(STYLE_ID);
-	if (styleEl) styleEl.remove();
-
-	const docRoot = parent.document.documentElement;
-	[
-		"--peace-accent-light",
-		"--peace-accent-dark",
-		"--peace-accent-color",
-		"--peace-bg-tint-light",
-		"--peace-bg-tint-dark",
-		"--peace-sidebar-light",
-		"--peace-sidebar-dark",
-		"--peace-header-light",
-		"--peace-header-dark",
-	].forEach((prop) => {
-		docRoot.style.removeProperty(prop);
-	});
-}
-
 
 /**
- * Abre o menu de seleção de paletas renderizando uma div diretamente no
- * parent.document.body — sem logseq.provideUI / showMainUI / hideMainUI.
- * Isso evita o iframe flutuante persistente que travava o Logseq.
+ * Remove todas as variáveis inline e elementos injetados.
+ * Chamado quando o plugin é descarregado (tema trocado/desativado).
+ */
+function cleanup() {
+	// Remove variáveis inline do <html>
+	try {
+		const root = parent.document.documentElement;
+		CSS_VARS.forEach((prop) => {
+			root.style.removeProperty(prop);
+		});
+	} catch (_) {
+		/* parent pode não estar acessível */
+	}
+
+	// Fecha o menu se estiver aberto
+	closeMenu();
+}
+
+/**
+ * Abre o menu de seleção de paletas.
  */
 function openMenu(palettes, defaultPalette) {
-	// Fecha qualquer instância anterior antes de abrir nova
 	closeMenu();
 
 	const button = parent.document.querySelector(".ti-palette")?.closest("a");
@@ -174,9 +77,8 @@ function openMenu(palettes, defaultPalette) {
 	const menuWidth = 200;
 	const top = rect.bottom + 6;
 	const left = rect.left - (menuWidth - rect.width);
-	const current = logseq.settings.palette || defaultPalette;
+	const current = logseq.settings?.palette || defaultPalette;
 
-	// ── Cria o container do menu ──────────────────────────────────────────────
 	const menu = parent.document.createElement("div");
 	menu.id = "peace-mind-menu";
 	Object.assign(menu.style, {
@@ -207,7 +109,7 @@ function openMenu(palettes, defaultPalette) {
 	title.textContent = "Peace Mind Palettes";
 	menu.appendChild(title);
 
-	// Lista de paletas
+	// Lista
 	const list = parent.document.createElement("div");
 	Object.assign(list.style, {
 		display: "flex",
@@ -232,7 +134,6 @@ function openMenu(palettes, defaultPalette) {
 				: "transparent",
 		});
 
-		// Swatch de cor
 		const swatch = parent.document.createElement("div");
 		Object.assign(swatch.style, {
 			width: "16px",
@@ -244,7 +145,6 @@ function openMenu(palettes, defaultPalette) {
 			flexShrink: "0",
 		});
 
-		// Nome
 		const label = parent.document.createElement("span");
 		Object.assign(label.style, {
 			flex: "1",
@@ -257,7 +157,6 @@ function openMenu(palettes, defaultPalette) {
 		item.appendChild(swatch);
 		item.appendChild(label);
 
-		// Check mark para paleta ativa
 		if (isActive) {
 			const check = parent.document.createElement("i");
 			check.className = "ti ti-check";
@@ -268,7 +167,6 @@ function openMenu(palettes, defaultPalette) {
 			item.appendChild(check);
 		}
 
-		// Hover
 		item.addEventListener("mouseenter", () => {
 			if (!isActive)
 				item.style.background =
@@ -280,7 +178,6 @@ function openMenu(palettes, defaultPalette) {
 			item.style.transform = "translateX(0)";
 		});
 
-		// Seleção de paleta
 		item.addEventListener("click", () => {
 			closeMenu();
 			applyPalette(palettes, id);
@@ -297,7 +194,6 @@ function openMenu(palettes, defaultPalette) {
 	menu.appendChild(list);
 	parent.document.body.appendChild(menu);
 
-	// Fecha ao clicar fora (num setTimeout para não capturar o click que abriu)
 	setTimeout(() => {
 		_outsideClickHandler = (e) => {
 			if (!menu.contains(e.target)) closeMenu();
@@ -306,7 +202,7 @@ function openMenu(palettes, defaultPalette) {
 	}, 0);
 }
 
-/** Remove o menu do DOM e limpa o handler de click externo */
+/** Remove o menu do DOM */
 function closeMenu() {
 	const existing = parent.document.getElementById("peace-mind-menu");
 	if (existing) existing.remove();
@@ -318,53 +214,7 @@ function closeMenu() {
 }
 
 // ─── main ────────────────────────────────────────────────────────────────────
-
-/**
- * Aguarda até que o parent.document.documentElement esteja disponível.
- * Necessário porque, na primeira instalação pela loja, o plugin pode
- * ser inicializado antes do DOM do Logseq estar completamente pronto.
- *
- * @param {number} timeout  — tempo máximo de espera em ms (padrão 10s)
- * @param {number} interval — intervalo entre tentativas em ms (padrão 250ms)
- * @returns {Promise<void>}
- */
-function waitForParentReady(timeout = 10000, interval = 250) {
-	return new Promise((resolve, reject) => {
-		const start = Date.now();
-		const check = () => {
-			try {
-				if (
-					typeof parent !== "undefined" &&
-					parent.document &&
-					parent.document.documentElement &&
-					parent.document.body
-				) {
-					resolve();
-					return;
-				}
-			} catch (_) {
-				/* cross-origin ou não pronto ainda */
-			}
-
-			if (Date.now() - start > timeout) {
-				reject(new Error("[PeaceMind] parent document not ready after timeout"));
-				return;
-			}
-			setTimeout(check, interval);
-		};
-		check();
-	});
-}
-
 async function main() {
-	// Aguarda o DOM do parent estar disponível
-	try {
-		await waitForParentReady();
-	} catch (err) {
-		console.warn(err.message, "– will retry once on theme change");
-	}
-
-	// Carrega as paletas do arquivo separado
 	const { palettes, defaultPalette } = await import("./palettes.js");
 
 	logseq.useSettingsSchema([
@@ -378,33 +228,39 @@ async function main() {
 		},
 	]);
 
-	// Cleanup total ao descarregar plugin
+	// Cleanup ao descarregar plugin
 	logseq.beforeunload(async () => {
-		clearPeaceMindStyles();
+		cleanup();
 	});
 
-	// Aplicação imediata ao carregar
+	/**
+	 * Verifica se o tema ativo é o PeaceMind.
+	 * O Logseq seta a URL do CSS do tema ativo; checamos se contém "peace-mind".
+	 */
+	function isPeaceMindTheme(url) {
+		if (!url) return false;
+		return url.toLowerCase().includes("peace-mind");
+	}
+
+	/**
+	 * Esconde ou mostra o botão da toolbar no parent document.
+	 */
+	function setToolbarButtonVisible(visible) {
+		try {
+			const btn = parent.document.querySelector(".peace-mind-toolbar-btn");
+			if (btn) {
+				btn.style.display = visible ? "" : "none";
+			}
+		} catch (_) {
+			/* parent pode não existir */
+		}
+	}
+
+	// Aplica a paleta salva (só se PeaceMind estiver ativo)
 	const currentPalette = logseq.settings?.palette || defaultPalette;
 	applyPalette(palettes, currentPalette);
 
-	// Retry: se o style element não foi criado (parent não pronto na 1ª vez),
-	// observa o DOM e reaplicar quando body aparecer.
-	if (!parent.document.getElementById("peacemind-dynamic-style")) {
-		const retryInterval = setInterval(() => {
-			try {
-				if (parent.document?.body) {
-					applyPalette(palettes, logseq.settings?.palette || defaultPalette);
-					clearInterval(retryInterval);
-				}
-			} catch (_) {
-				/* silently retry */
-			}
-		}, 500);
-		// Safety: para o retry após 15s
-		setTimeout(() => clearInterval(retryInterval), 15000);
-	}
-
-	// Modelo de eventos
+	// Modelo para o botão da toolbar
 	logseq.provideModel({
 		toggle_menu: () => {
 			const existing = parent.document.getElementById("peace-mind-menu");
@@ -416,7 +272,7 @@ async function main() {
 		},
 	});
 
-	// Botão na toolbar (com classe para controle de visibilidade)
+	// Botão na toolbar
 	logseq.App.registerUIItem("toolbar", {
 		key: "peace-mind-palette-button",
 		template:
@@ -431,9 +287,24 @@ async function main() {
 		applyPalette(palettes, newSettings.palette);
 	});
 
-	// Re-aplica quando o tema muda (light/dark toggle)
+	// Re-aplica quando o modo dark/light muda
 	logseq.App.onThemeModeChanged(() => {
 		applyPalette(palettes, logseq.settings?.palette || defaultPalette);
+	});
+
+	// ── Detecta troca de tema ────────────────────────────────────────────────
+	// Quando o usuário troca para outro tema, esconde o botão e limpa variáveis.
+	// Quando volta para PeaceMind, re-aplica a paleta e mostra o botão.
+	logseq.App.onThemeChanged(({ url }) => {
+		if (isPeaceMindTheme(url)) {
+			// Voltou para PeaceMind — re-aplica tudo
+			applyPalette(palettes, logseq.settings?.palette || defaultPalette);
+			setToolbarButtonVisible(true);
+		} else {
+			// Outro tema — limpa e esconde
+			cleanup();
+			setToolbarButtonVisible(false);
+		}
 	});
 }
 
