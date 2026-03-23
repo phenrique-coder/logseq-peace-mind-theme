@@ -164,23 +164,24 @@ function clearPeaceMindStyles() {
 	props.forEach((prop) => docRoot.style.removeProperty(prop));
 }
 
-/** Verifica se o tema ativo é o PeaceMind e aplica/remove estilos */
-async function syncPeaceMindState(themeName, palettes) {
-	// 1. Checagem por nome (inclusiva e case-insensitive)
-	const nameMatch = themeName?.toLowerCase().includes("peacemind");
+/**
+ * Verifica se o PeaceMind está ativo olhando no DOM pelo link do CSS.
+ * Mais confiável do que checar o nome via API.
+ */
+function isPeaceMindCssActive() {
+	return parent.document.querySelector('link[href*="peace-mind"]') !== null;
+}
 
-	// 2. Checagem por presença do CSS no DOM (Super seguro para Plugins de Tema)
-	// O Logseq injeta o tema com um ID ou href que contém o nome do arquivo
-	const isCssLoaded = parent.document.querySelector('link[id*="peacemind"], link[href*="peace-mind"]') !== null;
-
-	const isPeaceMind = nameMatch || isCssLoaded;
-
-	if (isPeaceMind) {
-		applyPalette(palettes, logseq.settings.palette);
-	} else if (themeName) {
-		// Só limpamos e escondemos se tivermos certeza que outro tema (com nome válido) foi escolhido
-		clearPeaceMindStyles();
-	}
+/** Chamado quando o usuário troca de tema no Logseq */
+function onThemeChange(palettes) {
+	// Pequeno delay para o DOM atualizar os link tags antes de verificar
+	setTimeout(() => {
+		if (isPeaceMindCssActive()) {
+			applyPalette(palettes, logseq.settings.palette);
+		} else {
+			clearPeaceMindStyles();
+		}
+	}, 300);
 }
 
 /**
@@ -378,15 +379,12 @@ async function main() {
 		props.forEach((prop) => docRoot.style.removeProperty(prop));
 	});
 
-	// Aplicação inicial baseada no tema atual do Logseq (com pequeno delay para o boot)
-	setTimeout(async () => {
-		const { preferredTheme } = await logseq.App.getUserConfigs();
-		syncPeaceMindState(preferredTheme, palettes);
-	}, 500);
+	// Aplicação imediata — o plugin só carrega quando ativo, então sempre aplica
+	applyPalette(palettes, logseq.settings.palette || defaultPalette);
 
-	// Listener de troca de tema
-	logseq.App.onThemeChanged(({ name }) => {
-		syncPeaceMindState(name, palettes);
+	// Listener de troca de tema — verifica pelo DOM se nosso CSS ainda está presente
+	logseq.App.onThemeChanged(() => {
+		onThemeChange(palettes);
 	});
 
 	// Modelo de eventos
@@ -410,16 +408,10 @@ async function main() {
 			"</a>",
 	});
 
-	// Re-aplica quando settings mudam (se o tema PeaceMind estiver ativo)
-	logseq.onSettingsChanged(async (newSettings) => {
+	// Re-aplica quando settings mudam
+	logseq.onSettingsChanged((newSettings) => {
 		if (_isApplying) return;
-		const { preferredTheme } = await logseq.App.getUserConfigs();
-		const nameMatch = preferredTheme?.toLowerCase().includes("peacemind");
-		const isCssLoaded = parent.document.querySelector('link[id*="peacemind"], link[href*="peace-mind"]') !== null;
-
-		if (nameMatch || isCssLoaded) {
-			applyPalette(palettes, newSettings.palette);
-		}
+		applyPalette(palettes, newSettings.palette);
 	});
 }
 
