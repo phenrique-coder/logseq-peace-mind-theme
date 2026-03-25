@@ -335,7 +335,8 @@ footer.create {
 	border-radius: 10px !important;
 	font-weight: 600 !important;
 	font-size: 0.95rem !important;
-	color: var(--peace-standard-text) !important;
+	/* color: var(--peace-standard-text) !important; */
+	color: #fafafa !important;
 	background: var(--peace-accent-color, #6b9e8a) !important;
 	border: 1px solid rgba(255, 255, 255, 0.15) !important;
 	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
@@ -345,7 +346,9 @@ footer.create {
 
 /* Hover "Blindado" - Garante que a cor do tema vença o padrão do Logseq */
 footer.create button#create-button:hover,
-#create-button:hover {
+#create-button:hover,
+.ui__button.create:hover,
+.left-sidebar-inner #create-button:hover {
 	background: var(--peace-accent-color, #6b9e8a) !important;
 	background-image: none !important;
 	filter: brightness(1.1) !important;
