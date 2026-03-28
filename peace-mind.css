@@ -194,17 +194,53 @@ h1.title,
 .ls-block[level="5"] .bullet { background-color: color-mix(in srgb, var(--peace-accent-color) 40%, transparent) !important; }
 .ls-block[level="6"] .bullet { background-color: color-mix(in srgb, var(--peace-accent-color) 25%, transparent) !important; }
 
+/* Correção para numeração de listas */
+.bullet-container.typed-list .bullet {
+	background-color: transparent !important;
+	color: var(--peace-standard-text) !important;
+	
+	/* Em vez de prender a largura, deixamos crescer em formato de 'Pílula' se o texto for longo */
+	border-radius: 20px !important;
+	width: auto !important;
+	height: 24px !important;
+	min-width: 24px !important;
+	
+	
+	display: flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	margin-right: 8px !important; /* Espaço para não grudar no texto */
+}
+
+.bullet-container.typed-list:hover .bullet {
+	background-color: color-mix(in srgb, var(--peace-accent-color) 90%, transparent) !important;
+}
+
+.bullet-container.typed-list .bullet label {
+	color: inherit !important;
+	font-weight: 600;
+	margin: 0 !important;
+	padding: 0 !important;
+	transform: translateX(1px); /* Ajuste óptico para centralizar o número */
+}
+
 /* Bullet fechado (com filhos ocultos) */
 .bullet-container.bullet-closed {
 	background-color: color-mix(in srgb, var(--peace-accent-color) 15%, transparent) !important;
 	border: 1px solid var(--peace-accent-color) !important;
 }
 
-/* Highlight do caminho ativo (Referência: Tema Cobra) */
+/* Highlight do caminho ativo */
 .ls-block:focus-within > div:first-child .bullet {
-	background-color: #ff4d4d !important; /* Destaque sutil em vermelho/coral */
-	box-shadow: 0 0 8px rgba(255, 77, 77, 0.4);
+	background-color: var(--peace-accent-color) !important; 
+	box-shadow: 0 0 8px color-mix(in srgb, var(--peace-accent-color) 40%, transparent);
 	transform: scale(1.1);
+}
+
+/* Garante que o hover/foco dentro de lista numerada mantenha o formato pílula e opacidade */
+.ls-block:focus-within > div:first-child .bullet-container.typed-list .bullet {
+	background-color: color-mix(in srgb, var(--peace-accent-color) 50%, transparent) !important;
+	border-radius: 20px !important;
 }
 
 /* ─── Scrollbars suaves ────────────────────────────────────────────────────── */
