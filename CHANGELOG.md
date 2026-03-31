@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.5] - 2026-03-31
+
+### Added
+- **Capsule Tags**: Implemented a modern "pill" shape for tags (`#tag`) with subtle backgrounds and consistent accent coloring.
+- **Enhanced Blockquotes**: Refined quote styling with left-border emphasis and sRGB color-mixing for soft background highlights.
+- **Organic Highlighter**: Replaced default yellow highlights (`==text==`) with a dynamic, palette-aware background that matches the theme's active accent.
+
+### Fixed
+- **Autocomplete Modals**: Fully styled the command palette (`/commands`) and other modals to follow the theme's palette, including refined hover and keyboard-focus states.
+- **Numbered List Geometry**: Final fixes for numbered list bullets to ensure a perfect capsule shape for long numerals (e.g., Roman) and correct alignment with text blocks.
+
 ## [1.1.4] - 2026-03-28
 
 ### Fixed
