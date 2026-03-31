@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.6] - 2026-03-31
+
+### Added
+- **Block Focus Indicator**: Implemented a modern 3px vertical accent border and soft background tint for the currently focused block, providing clear visual feedback during deep writing sessions.
+
+### Fixed
+- **Create Button**: Refined the "Create" button with a dashed border that dynamically adapts its color and opacity based on the active theme (Dark/Light), featuring a subtle transparency-based background for a more organic look.
+- **Header Stability**: Consistently enforced sticky behavior for the main header with a solid background to maintain UI integrity.
+
 ## [1.1.5] - 2026-03-31
 
 ### Added

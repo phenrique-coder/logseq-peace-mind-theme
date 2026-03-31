@@ -149,6 +149,18 @@ body {
 	font-family: var(--ls-font-family);
 	-webkit-font-smoothing: antialiased;
 	line-height: 1.6;
+	caret-color: var(--peace-accent-color) !important; /* Cursor na cor do tema */
+}
+
+/* ─── Indicador de Foco do Bloco ────────────────────────────────────────────── */
+.ls-block {
+	border-left: 3px solid transparent !important;
+	transition: all 0.2s ease !important;
+}
+
+.ls-block:focus-within {
+	border-left: 3px solid var(--peace-accent-color) !important;
+	background-color: color-mix(in srgb, var(--peace-accent-color) 4%, transparent) !important;
 }
 
 /* Título das páginas (no conteúdo principal) */
@@ -162,6 +174,15 @@ h1.title,
 	letter-spacing: -0.02em !important;
 	margin-bottom: 1.5rem !important;
 	line-height: 1.2 !important;
+}
+
+/* ─── Header ───────────────────────────────────────────────────────────────── */
+.cp__header {
+	background-color: var(--ls-header-bg-color) !important;
+	border-bottom: 1px solid var(--ls-border-color) !important;
+	position: sticky !important;
+	top: 0 !important;
+	z-index: 100 !important;
 }
 
 /* Transições suaves em toda a UI ao trocar paleta */
@@ -401,6 +422,17 @@ footer.create {
 	background: transparent !important;
 }
 
+/* Variáveis dinâmicas para a borda do botão */
+.dark-theme #create-button,
+html[data-theme="dark"] #create-button {
+	--create-btn-border: rgba(255, 255, 255, 0.4);
+}
+
+.white-theme #create-button,
+html[data-theme="light"] #create-button {
+	--create-btn-border: rgba(0, 0, 0, 0.5);
+}
+
 /* Selector ultra-específico para garantir a cor de fundo */
 .left-sidebar-inner footer.create button#create-button,
 #create-button {
@@ -414,8 +446,8 @@ footer.create {
 	font-size: 0.95rem !important;
 	/* color: var(--peace-standard-text) !important; */
 	color: var(--peace-standard-text,  #fafafa) !important;
-	background: var(--peace-accent-color, #6b9e8a) !important;
-	border: 1px solid rgba(255, 255, 255, 0.15) !important;
+	background: color-mix(in srgb, var(--peace-accent-color, #6b9e8a) 50%, transparent) !important;
+	border: 1px dashed var(--create-btn-border, rgba(0, 0, 0, 0.5)) !important;
 	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
 	transition: all 0.2s ease !important;
 	cursor: pointer !important;
@@ -427,8 +459,7 @@ html body .left-sidebar-inner footer.create button#create-button:hover,
 #create-button#create-button:hover,
 .ui__button.create:hover,
 .left-sidebar-inner #create-button:hover {
-	background: var(--peace-accent-color, #6b9e8a) !important;
-	background-color: var(--peace-accent-color, #6b9e8a) !important;
+	background-color: color-mix(in srgb, var(--peace-accent-color, #6b9e8a) 70%, transparent) !important;
 	background-image: none !important;
 	filter: brightness(1.1) !important;
 	transform: translateY(-2px) !important;
