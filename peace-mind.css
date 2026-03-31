@@ -180,9 +180,6 @@ h1.title,
 .cp__header {
 	background-color: var(--ls-header-bg-color) !important;
 	border-bottom: 1px solid var(--ls-border-color) !important;
-	position: sticky !important;
-	top: 0 !important;
-	z-index: 100 !important;
 }
 
 /* Transições suaves em toda a UI ao trocar paleta */
