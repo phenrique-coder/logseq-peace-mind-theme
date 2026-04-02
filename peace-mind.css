@@ -20,7 +20,7 @@ ul.favorites > li.favorite-item {
 	--ls-font-family:
 		-apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto,
 		"Helvetica Neue", Arial, sans-serif;
-	--ls-main-content-max-width: 900px;
+	--ls-main-content-max-width: 75%;
 	/* Defaults — sobrescritos dinamicamente pelo index.js */
 	--peace-accent-light: #8da399;
 	--peace-accent-dark: #a3b5a1;
@@ -817,6 +817,44 @@ html[data-theme="light"] .form-checkbox:checked {
 	overflow: hidden !important;
 }
 
+/* ─── Previews de Links e Tooltips (Tippy) ─────────────────────────────────── */
+.tippy-tooltip,
+.tippy-tooltip.customized-theme,
+.tippy-wrapper {
+	background-color: var(--ls-primary-background-color) !important;
+	color: var(--ls-primary-text-color) !important;
+	border-radius: 14px !important;
+	border: 1px solid var(--ls-border-color) !important;
+	/* Bordas levemente acentuadas em temas com accent */
+	border-color: color-mix(in srgb, var(--peace-accent-color) 15%, var(--ls-border-color)) !important;
+	box-shadow: 0 12px 48px rgba(0, 0, 0, 0.25) !important;
+	padding: 0 !important;
+	overflow: hidden !important;
+}
+
+.tippy-wrapper {
+	padding: 1.25rem !important; /* Espaçamento interno generoso para previews */
+}
+
+/* Títulos dentro do preview */
+.tippy-wrapper h2, 
+.tippy-wrapper h3 {
+	color: var(--ls-title-text-color) !important;
+	margin-bottom: 1rem !important;
+}
+
+/* Correção para fundo de blocos internos no tippy */
+.tippy-wrapper .ls-block {
+	background-color: transparent !important;
+}
+
+/* Setas (Arrows) */
+.tippy-popper[x-placement^='top'] .arrow-regular { border-top-color: var(--ls-border-color) !important; }
+.tippy-popper[x-placement^='bottom'] .arrow-regular { border-bottom-color: var(--ls-border-color) !important; }
+.tippy-popper[x-placement^='left'] .arrow-regular { border-left-color: var(--ls-border-color) !important; }
+.tippy-popper[x-placement^='right'] .arrow-regular { border-right-color: var(--ls-border-color) !important; }
+
+
 .menu-link {
 	border-radius: 8px !important;
 	margin: 2px 10px !important;
@@ -938,3 +976,77 @@ mark {
 	background-color: color-mix(in srgb, var(--peace-accent-color) 35%, transparent) !important;
 	color: white !important;
 }
+
+/* ─── Tabelas (Tables) ─────────────────────────────────────────────────────── */
+.table-wrapper {
+	overflow-x: auto;
+	margin: 1.5rem 0;
+	border-radius: 12px;
+	border: 1px solid var(--ls-border-color);
+	background-color: color-mix(in srgb, var(--peace-accent-color) 2%, var(--ls-primary-background-color));
+	padding: 10px;
+}
+
+table {
+	width: 100%;
+	border-collapse: separate !important;
+	border-spacing: 0;
+	font-size: 0.85rem;
+}
+
+table.table-auto {
+	width: auto;
+}
+
+thead th {
+	background-color: color-mix(in srgb, var(--peace-accent-color) 12%, transparent) !important;
+	color: var(--peace-accent-color) !important;
+	font-weight: 700 !important;
+	text-transform: uppercase;
+	font-size: 0.75rem;
+	letter-spacing: 0.08em;
+	padding: 14px 18px !important;
+	white-space: nowrap !important;
+	text-align: left;
+	border-bottom: 2px solid var(--ls-border-color) !important;
+}
+
+/* Arredondamento dos cantos superiores do thead */
+thead tr:first-child th:first-child { border-top-left-radius: 8px; }
+thead tr:first-child th:last-child { border-top-right-radius: 8px; }
+
+tbody td {
+	padding: 12px 18px !important;
+	border-bottom: 1px solid var(--ls-border-color) !important;
+	color: var(--ls-primary-text-color) !important;
+	line-height: 1.6;
+}
+
+tbody tr:last-child td {
+	border-bottom: none !important;
+}
+
+/* Efeito de hover nas linhas */
+tbody tr {
+	transition: background-color 0.2s ease;
+}
+
+tbody tr:hover {
+	background-color: color-mix(in srgb, var(--peace-accent-color) 8%, transparent) !important;
+}
+
+/* Estilo para links e códigos dentro da tabela */
+table code {
+	background-color: color-mix(in srgb, var(--peace-accent-color) 10%, transparent) !important;
+	color: var(--peace-accent-color) !important;
+	border: 1px solid color-mix(in srgb, var(--peace-accent-color) 20%, transparent) !important;
+	padding: 2px 6px !important;
+	border-radius: 4px;
+	font-family: inherit;
+	font-size: 0.85em;
+}
+
+/* Alinhamentos padrão do Org-mode */
+.org-left { text-align: left; }
+.org-right { text-align: right; }
+.org-center { text-align: center; }

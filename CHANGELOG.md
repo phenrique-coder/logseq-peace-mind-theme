@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.8] - 2026-04-02
+
+### Added
+- **Table Aesthetics**: Implemented premium table styling with glassmorphism backgrounds (`color-mix`), reduced font size (0.85rem), and `white-space: nowrap` for headers.
+- **Enhanced Tooltips**: Fully styled link previews and Tippy.js tooltips with theme colors, accent borders, and updated typography for consistency with the PeaceMind palette.
+
+### Changed
+- **Responsive Content**: Switched main content width to 75% (previously fixed at 1200px/900px), ensuring a consistent experience across all screen sizes while reducing empty space on large monitors.
+
 ## [1.1.7] - 2026-03-31
 
 ### Added
