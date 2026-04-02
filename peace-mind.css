@@ -978,16 +978,20 @@ mark {
 }
 
 /* ─── Tabelas (Tables) ─────────────────────────────────────────────────────── */
-.table-wrapper {
+#app-container .table-wrapper,
+#main-content-container .table-wrapper,
+html body .table-wrapper,
+div.table-wrapper {
 	overflow-x: auto;
 	margin: 1.5rem 0;
 	border-radius: 12px;
-	border: 1px solid var(--ls-border-color);
-	background-color: color-mix(in srgb, var(--peace-accent-color) 2%, var(--ls-primary-background-color));
+	border: 1px solid var(--ls-border-color) !important;
+	background-color: color-mix(in srgb, var(--peace-accent-color) 6%, var(--ls-primary-background-color)) !important;
 	padding: 10px;
 }
 
-table {
+#app-container table,
+html body table {
 	width: 100%;
 	border-collapse: separate !important;
 	border-spacing: 0;
@@ -1035,6 +1039,12 @@ tbody tr:hover {
 	background-color: color-mix(in srgb, var(--peace-accent-color) 8%, transparent) !important;
 }
 
+/* Efeito zebra nas linhas (blindado para produção) */
+#app-container #main-content-container tbody tr:nth-child(even),
+html body tbody tr:nth-child(even) {
+	background-color: color-mix(in srgb, var(--peace-accent-color) 4%, transparent) !important;
+}
+
 /* Estilo para links e códigos dentro da tabela */
 table code {
 	background-color: color-mix(in srgb, var(--peace-accent-color) 10%, transparent) !important;
@@ -1050,3 +1060,82 @@ table code {
 .org-left { text-align: left; }
 .org-right { text-align: right; }
 .org-center { text-align: center; }
+
+/* ─── Blocos de Código (Code Blocks / CodeMirror) ───────────────────────────── */
+#app-container .extensions__code,
+html body .extensions__code {
+	background-color: transparent !important;
+	border: none !important;
+	padding: 0 !important;
+	margin: 1.5rem 0 !important;
+	position: relative !important; /* Permite posicionamento absoluto do label de lang */
+}
+
+/* Etiqueta de Linguagem (Superior Direito) */
+#app-container .extensions__code-lang,
+html body .extensions__code-lang {
+	background-color: transparent !important;
+	color: var(--peace-accent-color) !important;
+	font-weight: 700 !important;
+	font-size: 0.65rem !important;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	opacity: 0.8 !important;
+	padding: 12px 20px !important;
+	z-index: 10 !important;
+	pointer-events: none;
+}
+
+#app-container .CodeMirror,
+html body .CodeMirror {
+	background-color: color-mix(in srgb, var(--ls-primary-background-color) 90%, var(--peace-accent-color)) !important;
+	border-radius: 10px !important;
+	border: 1px solid var(--ls-border-color) !important;
+	font-family: inherit !important;
+	font-size: 0.9rem !important;
+	line-height: 1.6 !important;
+	overflow: hidden !important;
+}
+
+.dark-theme #app-container .CodeMirror,
+.dark-theme html body .CodeMirror {
+	background-color: color-mix(in srgb, var(--ls-primary-background-color) 92%, white) !important;
+	border: 1px solid var(--ls-border-color) !important;
+}
+
+/* Gutter (área dos números de linha) */
+.CodeMirror-gutters {
+	background-color: color-mix(in srgb, var(--peace-accent-color) 4%, var(--ls-secondary-background-color)) !important;
+	border-right: 1px solid var(--ls-border-color) !important;
+	border-radius: 12px 0 0 12px !important;
+}
+
+.CodeMirror-linenumber {
+	color: color-mix(in srgb, var(--peace-accent-color) 30%, var(--ls-secondary-text-color)) !important;
+	padding: 0 8px !important;
+}
+
+/* Linha ativa */
+.CodeMirror-activeline-background {
+	background-color: color-mix(in srgb, var(--peace-accent-color) 8%, transparent) !important;
+}
+
+/* Cursor customizado no editor de código */
+.CodeMirror-cursor {
+	border-left: 2px solid var(--peace-accent-color) !important;
+}
+
+/* Cores de Sintaxe (CM-S-LSRADIX é o padrão do Logseq) */
+.cm-s-lsradix span.cm-comment { color: color-mix(in srgb, var(--peace-accent-color) 40%, #a0a0a0) !important; font-style: italic; }
+.cm-s-lsradix span.cm-keyword { color: var(--peace-accent-color) !important; font-weight: 700; }
+.cm-s-lsradix span.cm-string { color: color-mix(in srgb, var(--peace-accent-color) 80%, #8da399) !important; }
+.cm-s-lsradix span.cm-variable-2 { color: var(--ls-primary-text-color) !important; }
+.cm-s-lsradix span.cm-def { color: var(--peace-accent-color) !important; opacity: 0.9; }
+.cm-s-lsradix span.cm-meta { color: var(--peace-accent-color) !important; }
+.cm-s-lsradix span.cm-atom { color: var(--peace-accent-color) !important; }
+.cm-s-lsradix span.cm-number { color: var(--peace-accent-color) !important; }
+
+/* Fundo do editor quando focado */
+.CodeMirror-focused .CodeMirror-selected {
+	background-color: color-mix(in srgb, var(--peace-accent-color) 20%, transparent) !important;
+}

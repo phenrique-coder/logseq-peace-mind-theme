@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.9] - 2026-04-02
+
+### Added
+- **Premium Code Blocks**: Fully styled CodeMirror editor with accented gutters, syntax highlighting based on the active palette, and refined language labels.
+- **Improved Code UX**: Integrated a framed layout with generous padding and internal border-radius for better separation between code and surrounding blocks.
+
 ## [1.1.8] - 2026-04-02
 
 ### Added
